@@ -128,7 +128,6 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
 
         // This will assign ownership, and also emit the Transfer event as
         // per ERC721 draft
-        ///_transfer(0, _owner, newKittenId); transfer로 민팅 불가능
         _safeMint(_owner, newBummyId);
 
 

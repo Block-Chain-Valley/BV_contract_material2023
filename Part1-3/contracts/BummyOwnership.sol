@@ -8,7 +8,7 @@ contract BummyOwnership is BummyBase {
 
     /// @dev _tokenId에 해당하는 token의 owner가 _claimant 과 동일하면 true 아니면 false를 반환
     /// @param _claimant the address we are validating against.
-    /// @param _tokenId kitten id, only valid when > 0
+    /// @param _tokenId bummy id, only valid when > 0
     function _owns(address _claimant, uint256 _tokenId) internal view returns (bool) {
         
     }
