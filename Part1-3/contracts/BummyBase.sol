@@ -73,9 +73,8 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
     /// @dev _tokenId에 해당하는 Bummy를 _from에서 _to로 보냅니다.
     /// 
     function _transfer(address _from, address _to, uint256 _tokenId) override internal virtual {
-        if (_from != address(0)) {
-
-            delete sireAllowedToAddress[_tokenId];    
+        if(_from != address(0)){
+            delete sireAllowedToAddress[_tokenId];
         }
         super._transfer(_from,_to,_tokenId);
     }
