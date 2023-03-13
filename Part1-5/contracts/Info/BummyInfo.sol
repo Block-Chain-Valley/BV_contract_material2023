@@ -27,7 +27,20 @@ contract GeneScience {
     }
     function _mixGenes(uint256 _genes1, uint256 _genes2) internal view returns(uint256) {
         
-		/* 자유롭게 작성하세요.*/
+				uint256 gene = uint256(keccak256(abi.encode(block.timestamp)))^(_getFirstNBits(_genes1, 128, 256) + _getLastNBits(_genes2, 128));
+
+        return gene;
+    }
+
+    function _getLastNBits(uint x, uint n) internal pure returns (uint) {
+        uint mask = (1 << n) - 1;
+        return x & mask;
+    }
+
+    function _getFirstNBits(uint x, uint n, uint len) internal pure returns (uint) {
+
+        uint mask = ((1 << n) - 1) << (len - n);
+        return x & mask;
     }
     
 }
