@@ -16,7 +16,7 @@ contract BummyCheering is BummyOwnership {
 
     /// @dev Update the address of the genetic contract, can only be called by the CEO.
     /// @param _address An address of a GeneScience contract instance to be used from this point forward.
-    function setGeneScienceAddress(address _address) public onlyCEO {
+    function setBummyInfoAddress(address _address) public onlyCEO {
         BummyInfoInterface candidateContract = BummyInfoInterface(_address);
 
         // NOTE: verify that a contract is what we expect
@@ -30,12 +30,12 @@ contract BummyCheering is BummyOwnership {
     /// @dev Check if a dad has authorized breeding with this mom. True if both dad
     ///  and mom have the same owner, or if the dad has given siring permission to
     ///  the mom's owner (via approveSiring()).
-    function _isSiringPermitted(uint256 _dadId, uint256 _momId) internal view returns (bool) {
+    function _isCheeringPermitted(uint256 _dadId, uint256 _momId) internal view returns (bool) {
         address momOwner = _ownerOf(_momId);
 
         // Siring is okay if they have same owner, or if the mom's owner was given
         // permission to breed with this dad.
-        return (sireAllowedToAddress[_dadId] == momOwner);
+        return (cheerAllowedToAddress[_dadId] == momOwner);
     }
 
     /// @dev Set the cooldownEndTime for the given Bummy, based on its current cooldownIndex.
@@ -58,12 +58,12 @@ contract BummyCheering is BummyOwnership {
     /// @param _addr The address that will be able to dad with your Bummy. Set to
     ///  address(0) to clear all siring approvals for this Bummy.
     /// @param _dadId A Bummy that you own that _addr will now be able to dad with.
-    function approveSiring(address _addr, uint256 _dadId)
+    function approveCheering(address _addr, uint256 _dadId)
         public
         whenNotPaused
     {
         require(_owns(msg.sender, _dadId));
-        sireAllowedToAddress[_dadId] = _addr;
+        cheerAllowedToAddress[_dadId] = _addr;
     }
 
 
@@ -76,7 +76,7 @@ contract BummyCheering is BummyOwnership {
     /// @notice Checks that a given bummy is able to breed (i.e. it is not pregnant or
     ///  in the middle of a siring cooldown).
     /// @param _bummyId reference the id of the bummy, any user can inquire about it
-    function isReadyToBreed(uint256 _bummyId)
+    function isReadyToCheer(uint256 _bummyId)
         public
         view
         returns (bool)
@@ -146,7 +146,7 @@ contract BummyCheering is BummyOwnership {
     /// @notice 개족보가 아니고, 쿨타임이 아닐때
     /// @param _momId The ID of the proposed mom.
     /// @param _dadId The ID of the proposed dad.
-    function canBreedWith(uint256 _momId, uint256 _dadId)
+    function canCheerWith(uint256 _momId, uint256 _dadId)
         public
         view
         returns(bool)
@@ -156,7 +156,7 @@ contract BummyCheering is BummyOwnership {
         Bummy storage mom = bummies[_momId];
         Bummy storage dad = bummies[_dadId];
         return _isValidMatingPair(mom, _momId, dad, _dadId) &&
-            _isSiringPermitted(_dadId, _momId);
+            _isCheeringPermitted(_dadId, _momId);
     }
 
     /// @notice Breed a Bummy you own (as mom) with a dad that you own, or for which you
@@ -182,7 +182,7 @@ contract BummyCheering is BummyOwnership {
         // Check that mom and dad are both owned by caller, or that the dad
         // has given siring permission to caller (i.e. mom's owner).
         // Will fail for _sireId = 0
-        require(_isSiringPermitted(_dadId, _momId));
+        require(_isCheeringPermitted(_dadId, _momId));
 
         // Grab a reference to the potential mom
         Bummy storage mom = bummies[_momId];
@@ -224,8 +224,8 @@ contract BummyCheering is BummyOwnership {
 
         // Clear siring permission for both parents. This may not be strictly necessary
         // but it's likely to avoid confusion!
-        delete sireAllowedToAddress[_momId];
-        delete sireAllowedToAddress[_dadId];
+        delete cheerAllowedToAddress[_momId];
+        delete cheerAllowedToAddress[_dadId];
 
         // Emit the pregnancy event.
         emit Pregnant(_ownerOf(_momId), _momId, _dadId);
