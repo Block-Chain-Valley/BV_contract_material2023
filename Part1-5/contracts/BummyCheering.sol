@@ -91,7 +91,7 @@ contract BummyCheering is BummyOwnership {
     ///  no pending pregnancy.
     function _isReadyToCheer(Bummy memory _bum) internal view returns (bool) {
         // In addition to checking the cooldownEndTime, we also need to check to see if
-        // the cat has a pending birth; there can be some period of time between the end
+        // the bum has a pending birth; there can be some period of time between the end
         // of the pregnacy timer and the birth event.
         return (_bum.siringWithId == 0) && (_bum.cooldownEndTime <= block.timestamp);
     }
@@ -124,7 +124,7 @@ contract BummyCheering is BummyOwnership {
             return false;
         }
 
-        // We can short circuit the sibling check (below) if either cat is
+        // We can short circuit the sibling check (below) if either bum is
         // gen zero (has a mom ID of zero).
         if (_dad.MomId == 0 || _mom.MomId == 0) {
             return true;
@@ -160,7 +160,7 @@ contract BummyCheering is BummyOwnership {
     }
 
     /// @notice Breed a Bummy you own (as mom) with a dad that you own, or for which you
-    ///  have previously been given Siring approval. Will either make your cat pregnant, or will
+    ///  have previously been given Siring approval. Will either make your bum pregnant, or will
     ///  fail entirely.
     /// @param _momId The ID of the Bummy acting as mom (will end up pregnant if successful)
     /// @param _dadId The ID of the Bummy acting as dad (will begin its siring cooldown if successful)
@@ -176,7 +176,7 @@ contract BummyCheering is BummyOwnership {
         // For dad: Similarly, a dad on auction will be owned by the auction house
         //   and the act of transferring ownership will have cleared any oustanding
         //   siring approval.
-        // Thus we don't need to spend gas explicitly checking to see if either cat
+        // Thus we don't need to spend gas explicitly checking to see if either bum
         // is on auction.
 
         // Check that mom and dad are both owned by caller, or that the dad
@@ -249,7 +249,7 @@ contract BummyCheering is BummyOwnership {
         // Grab a reference to the mom in storage.
         Bummy storage mom = bummies[_momId];
 
-        // Check that the mom is a valid cat.
+        // Check that the mom is a valid bum.
         require(mom.birthTime != 0);
 
         // Check that the mom is pregnant, and that its time has come!
