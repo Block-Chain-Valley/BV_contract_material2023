@@ -1,4 +1,3 @@
-
 async function main() {
   const [deployer] = await ethers.getSigners();
 
@@ -7,7 +6,7 @@ async function main() {
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
   const HelloWorld = await ethers.getContractFactory("HelloWorld");
-  const HelloWorldToken = await HelloWorld.deploy("HelloWorld","BV",10**20);
+  const HelloWorldToken = await HelloWorld.deploy("HelloWorld", "BV", 10 ** 20);
 
   console.log("Token address:", HelloWorldToken.address);
 }
