@@ -19,7 +19,7 @@ contract BummyOwnership is BummyBase {
     /// 있다면 이를 _recipient한테 돌려보냅니다.
     /// @param _bummyId - ID of bummy
     /// @param _recipient - Address to send the cat to
-    function rescueLostBummy(uint256 _bummyId, address _recipient) public onlyCOO whenNotPaused {
+    function rescueLostBummy(uint256 _bummyId, address _recipient) external onlyCOO whenNotPaused {
         require(_owns(address(this),_bummyId));
         _transfer(address(this), _recipient, _bummyId);
         

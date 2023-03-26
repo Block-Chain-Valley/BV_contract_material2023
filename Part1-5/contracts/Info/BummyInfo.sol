@@ -4,9 +4,7 @@ pragma solidity ^0.8.17;
 import "../Interface/BummyInfoInterface.sol";
 import "../Interface/BummyCoreInterface.sol";
 
-/// @title GeneScience implements the trait calculation for new kitties
-/// @author Axiom Zen, Dieter Shirley <dete@axiomzen.co> (https://github.com/dete), Fabiano P. Soriani <fabianosoriani@gmail.com> (https://github.com/flockonus), Jordan Schalm <jordan.schalm@gmail.com> (https://github.com/jordanschalm), Abhishek Chadha <abhishek@dapperlabs.com> (https://github.com/achadha235)
-contract GeneScience {
+contract BummyInfo {
     bool public isGeneScience = true;
 
     // This is the privileged birther address. If this is set to 0, privileged birthing is disabled

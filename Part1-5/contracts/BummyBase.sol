@@ -30,7 +30,7 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
         uint32 DadId;
 
         // 교배 중인 BummyId
-        uint32 siringWithId;
+        uint32 cheeringWithId;
 
         //교배시 1씩 증가하며 교배 쿨타임 기간 증가
         uint8 cooldownIndex;
@@ -104,7 +104,7 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
             cooldownEndTime: 0,
             MomId: uint32(_momId),
             DadId: uint32(_dadId),
-            siringWithId: 0,
+            cheeringWithId: 0,
             cooldownIndex: 0,
             children: 0,
             generation: uint16(_generation)

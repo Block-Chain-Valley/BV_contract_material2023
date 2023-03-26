@@ -43,32 +43,21 @@ contract BummyAccessControl is Pausable{
 
     /// @dev Assigns a new address to act as the CEO. Only available to the current CEO.
     /// @param _newCEO The address of the new CEO
-    function setCEO(address _newCEO) public onlyCEO {
+    function setCEO(address _newCEO) external onlyCEO {
         require(_newCEO != address(0));
 
         ceoAddress = _newCEO;
     }
 
-    /// @dev Assigns a new address to act as the CFO. Only available to the current CEO.
-    /// @param _newCFO The address of the new CFO
-    function setCFO(address _newCFO) public onlyCEO {
-        require(_newCFO != address(0));
-
-        cfoAddress = _newCFO;
-    }
 
     /// @dev Assigns a new address to act as the COO. Only available to the current CEO.
     /// @param _newCOO The address of the new COO
-    function setCOO(address _newCOO) public onlyCEO {
+    function setCOO(address _newCOO) external onlyCEO {
         require(_newCOO != address(0));
 
         cooAddress = _newCOO;
     }
 
-    function withdrawBalance() external onlyCFO {
-       (bool sucess, ) = payable(cfoAddress).call{value: address(this).balance}(""); // 이 컨트랙트에 있는 잔여 이더를 전송
-       require(sucess, "Failed to send Ether");
-    }
 
     /// @dev Called by any "C-level" role to pause the contract. Used only when
     ///  a bug or exploit is detected and we need to limit damage.
@@ -79,7 +68,7 @@ contract BummyAccessControl is Pausable{
     /// @dev Unpauses the smart contract. Can only be called by the CEO, since
     ///  one reason we may pause the contract is when CFO or COO accounts are
     ///  compromised.
-    function unpause() public onlyCEO {
+    function unpause() public virtual onlyCEO {
         // can't unpause if contract was upgraded
         _unpause();
     }
