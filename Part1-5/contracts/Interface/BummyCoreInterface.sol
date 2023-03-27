@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 interface BummyCoreInterface {
     //* BummyAccessControl
-    function cooAddress() external returns(address);
+    function cooAddress() external view returns(address);
     function setCEO(address _newCEO) external;
     function setCOO(address _newCOO) external;
 

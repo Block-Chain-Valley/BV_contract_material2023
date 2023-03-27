@@ -8,26 +8,16 @@ async function main() {
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
   const BummyCore = await ethers.getContractFactory("BummyCore");
-  const BummyCoreInterface = await ethers.getContractFactory(
-    "BummyCoreInterface"
-  );
+
   const BummyInfo = await ethers.getContractFactory("BummyInfo");
-  const BummyInfoInterface = await ethers.getContractFactory(
-    "BummyInfoInterface"
-  );
 
   const BummyCoreNFT = await BummyCore.deploy();
-  const BummyCoreInterfaceDeploy = await BummyCoreInterface.deploy();
   const BummyInfoDeploy = await BummyInfo.deploy(
     deployer.address,
     BummyCoreNFT.address
   );
 
-  console.log(
-    "Token address:",
-    BummyCoreNFT.address,
-    BummyCoreInterfaceDeploy.address
-  );
+  console.log("Token address:", BummyCoreNFT.address);
 }
 
 main()

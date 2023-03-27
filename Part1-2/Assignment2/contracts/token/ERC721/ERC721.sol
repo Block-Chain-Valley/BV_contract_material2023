@@ -159,7 +159,6 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      */
     function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override {
         safeTransferFrom(from, to, tokenId, "");
-
     }
 
     /**
@@ -189,14 +188,16 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * Emits a {Transfer} event.
      */
     function _safeTransfer(address from, address to, uint256 tokenId, bytes memory data) internal virtual {
-        
+        _transfer(from,to,tokenId);
+        require(_checkOnERC721Received(from,to,tokenId,data),"Not ERC721 Receiver");
+        emit Transfer(from, to, tokenId);
     }
 
     /**
      * @dev Returns the owner of the `tokenId`. Does NOT revert if token doesn't exist
      */
     function _ownerOf(uint256 tokenId) internal view virtual returns (address) {
-        
+        return _owners[tokenId];
     }
 
     /**
@@ -208,7 +209,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * and stop existing when they are burned (`_burn`).
      */
     function _exists(uint256 tokenId) internal view virtual returns (bool) {
-        
+        return ownerOf(tokenId) != address(0);
     }
 
     /**

@@ -91,14 +91,14 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * @dev See {IERC20-totalSupply}.
      */
     function totalSupply() public view virtual override returns (uint256) {
-        
+        return _totalSupply;
     }
 
     /**
      * @dev See {IERC20-balanceOf}.
      */
     function balanceOf(address account) public view virtual override returns (uint256) {
-        
+        return _balances[account];
     }
 
     /**
@@ -117,7 +117,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * @dev See {IERC20-allowance}.
      */
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
-        
+        return _allowances[owner][spender];
     }
 
     /**
@@ -203,7 +203,14 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `from` must have a balance of at least `amount`.
      */
     function _transfer(address from, address to, uint256 amount) internal virtual {
-        
+        require(from != address(0) && to != address(0));
+        require(_balances[from] >= amount,"you don't have enough token");
+        require(_allowances[from][to] >= amount,"you aren't allowed");
+        unchecked{
+            _balances[from] -= amount;
+            _balances[to] += amount;
+        }
+        emit Transfer(from, to, amount);
     }
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
@@ -216,7 +223,9 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `account` cannot be the zero address.
      */
     function _mint(address account, uint256 amount) internal virtual {
-        
+        _balances[account] += amount;
+        _totalSupply += amount;
+        emit Transfer(address(0),account,amount);
     }
 
     /**
@@ -231,7 +240,9 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `account` must have at least `amount` tokens.
      */
     function _burn(address account, uint256 amount) internal virtual {
-        
+        require(account != address(0));
+        require(_balances[account] >= amount,"");
+        _balances[account] -= amount;
     }
 
     /**
@@ -248,7 +259,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `spender` cannot be the zero address.
      */
     function _approve(address owner, address spender, uint256 amount) internal virtual {
-       
+       require(owner != address(0) && spender != address(0));
+       _allowances[owner][spender] = amount;
     }
 
     /**
@@ -260,8 +272,10 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * Might emit an {Approval} event.
      */
     function _spendAllowance(address owner, address spender, uint256 amount) internal virtual {
+        require(_allowances[owner][spender] >= amount);
+        _allowances[owner][spender] -= amount;
         
-        
+        emit Approval(owner, spender, _allowances[owner][spender]);
     }
 
    

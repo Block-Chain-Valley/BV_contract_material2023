@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import "./BummyMinting.sol";
 import "./Interface/BummyCoreInterface.sol";
+
 contract BummyCore is BummyMinting{
     // Set in case the core contract is broken and an upgrade is required
     BummyCoreInterface public newContractAddress;
@@ -56,7 +57,7 @@ contract BummyCore is BummyMinting{
         Bummy storage bum = bummies[_id];
 
         // if this variable is 0 then it's not gestating
-        isGestating = (bum.cheeringWithId != 0); 
+        isGestating = (bum.cheeringWithId != 0);
         isReady = (bum.cooldownEndTime <= block.timestamp);
         cooldownIndex = uint256(bum.cooldownIndex);
         nextActionAt = uint256(bum.cooldownEndTime);
@@ -67,14 +68,14 @@ contract BummyCore is BummyMinting{
         generation = uint256(bum.generation);
         genes = bum.genes;
     }
-
-    function unpause() public virtual override onlyCEO {
-        require(address(newContractAddress) == address(0));
-
-        // Actually unpause the contract.
-        super.unpause();
-    }
-
-
-
 }
+
+   
+  
+
+    
+    
+
+  
+
+    

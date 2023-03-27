@@ -7,7 +7,6 @@ contract BummyCheering is BummyOwnership {
 
     event Exhausted(address owner, uint256 momId, uint256 dadId);
 
-
     /// @dev The address of the sibling contract that is used to implement the sooper-sekret
     ///  genetic combination algorithm.
     BummyInfoInterface public bummyGene;
