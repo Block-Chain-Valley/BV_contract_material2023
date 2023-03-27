@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v4.8.0) (token/ERC721/ERC721.sol)
+// OpenZeppelin Contracts (last updated v4.8.2) (token/ERC721/ERC721.sol)
 
 pragma solidity ^0.8.0;
 
@@ -142,7 +142,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      */
     function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
         return _operatorApprovals[owner][operator];
-    }   
+    }
 
     /**
      * @dev See {IERC721-transferFrom}.
@@ -188,9 +188,8 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * Emits a {Transfer} event.
      */
     function _safeTransfer(address from, address to, uint256 tokenId, bytes memory data) internal virtual {
-        _transfer(from,to,tokenId);
-        require(_checkOnERC721Received(from,to,tokenId,data),"Not ERC721 Receiver");
-        emit Transfer(from, to, tokenId);
+        _transfer(from, to, tokenId);
+        require(_checkOnERC721Received(from, to, tokenId, data), "ERC721: transfer to non ERC721Receiver implementer");
     }
 
     /**
@@ -209,7 +208,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * and stop existing when they are burned (`_burn`).
      */
     function _exists(uint256 tokenId) internal view virtual returns (bool) {
-        return ownerOf(tokenId) != address(0);
+        return _ownerOf(tokenId) != address(0);
     }
 
     /**
@@ -220,7 +219,8 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * - `tokenId` must exist.
      */
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool) {
-        
+        address owner = ERC721.ownerOf(tokenId);
+        return (spender == owner || isApprovedForAll(owner, spender) || getApproved(tokenId) == spender);
     }
 
     /**
@@ -235,8 +235,6 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      */
     function _safeMint(address to, uint256 tokenId) internal virtual {
         _safeMint(to, tokenId, "");
-        //아래에 작성한 함수를 그대로 사용해 아무 data를 넣지않고 민팅했을때를 위해 만든 함수입니다.
-        //이미 작성이 완료된 함수입니다.
     }
 
     /**
@@ -244,7 +242,11 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
      */
     function _safeMint(address to, uint256 tokenId, bytes memory data) internal virtual {
-        
+        _mint(to, tokenId);
+        require(
+            _checkOnERC721Received(address(0), to, tokenId, data),
+            "ERC721: transfer to non ERC721Receiver implementer"
+        );
     }
 
     /**
@@ -260,7 +262,27 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * Emits a {Transfer} event.
      */
     function _mint(address to, uint256 tokenId) internal virtual {
-        
+        require(to != address(0), "ERC721: mint to the zero address");
+        require(!_exists(tokenId), "ERC721: token already minted");
+
+        _beforeTokenTransfer(address(0), to, tokenId, 1);
+
+        // Check that tokenId was not minted by `_beforeTokenTransfer` hook
+        require(!_exists(tokenId), "ERC721: token already minted");
+
+        unchecked {
+            // Will not overflow unless all 2**256 token ids are minted to the same owner.
+            // Given that tokens are minted one by one, it is impossible in practice that
+            // this ever happens. Might change if we allow batch minting.
+            // The ERC fails to describe this case.
+            _balances[to] += 1;
+        }
+
+        _owners[tokenId] = to;
+
+        emit Transfer(address(0), to, tokenId);
+
+        _afterTokenTransfer(address(0), to, tokenId, 1);
     }
 
     /**
@@ -275,7 +297,26 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * Emits a {Transfer} event.
      */
     function _burn(uint256 tokenId) internal virtual {
-  
+        address owner = ERC721.ownerOf(tokenId);
+
+        _beforeTokenTransfer(owner, address(0), tokenId, 1);
+
+        // Update ownership in case tokenId was transferred by `_beforeTokenTransfer` hook
+        owner = ERC721.ownerOf(tokenId);
+
+        // Clear approvals
+        delete _tokenApprovals[tokenId];
+
+        unchecked {
+            // Cannot overflow, as that would require more tokens to be burned/transferred
+            // out than the owner initially received through minting and transferring in.
+            _balances[owner] -= 1;
+        }
+        delete _owners[tokenId];
+
+        emit Transfer(owner, address(0), tokenId);
+
+        _afterTokenTransfer(owner, address(0), tokenId, 1);
     }
 
     /**
@@ -290,7 +331,31 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * Emits a {Transfer} event.
      */
     function _transfer(address from, address to, uint256 tokenId) internal virtual {
-        
+        require(ERC721.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
+        require(to != address(0), "ERC721: transfer to the zero address");
+
+        _beforeTokenTransfer(from, to, tokenId, 1);
+
+        // Check that tokenId was not transferred by `_beforeTokenTransfer` hook
+        require(ERC721.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
+
+        // Clear approvals from the previous owner
+        delete _tokenApprovals[tokenId];
+
+        unchecked {
+            // `_balances[from]` cannot overflow for the same reason as described in `_burn`:
+            // `from`'s balance is the number of token held, which is at least one before the current
+            // transfer.
+            // `_balances[to]` could overflow in the conditions described in `_mint`. That would require
+            // all 2**256 token ids to be minted, which in practice is impossible.
+            _balances[from] -= 1;
+            _balances[to] += 1;
+        }
+        _owners[tokenId] = to;
+
+        emit Transfer(from, to, tokenId);
+
+        _afterTokenTransfer(from, to, tokenId, 1);
     }
 
     /**
@@ -299,7 +364,8 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * Emits an {Approval} event.
      */
     function _approve(address to, uint256 tokenId) internal virtual {
-       
+        _tokenApprovals[tokenId] = to;
+        emit Approval(ERC721.ownerOf(tokenId), to, tokenId);
     }
 
     /**
@@ -308,14 +374,16 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * Emits an {ApprovalForAll} event.
      */
     function _setApprovalForAll(address owner, address operator, bool approved) internal virtual {
-
+        require(owner != operator, "ERC721: approve to caller");
+        _operatorApprovals[owner][operator] = approved;
+        emit ApprovalForAll(owner, operator, approved);
     }
 
     /**
      * @dev Reverts if the `tokenId` has not been minted yet.
      */
     function _requireMinted(uint256 tokenId) internal view virtual {
-        
+        require(_exists(tokenId), "ERC721: invalid token ID");
     }
 
     /**
@@ -366,21 +434,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      *
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 /* firstTokenId */,
-        uint256 batchSize
-    ) internal virtual {
-        if (batchSize > 1) {
-            if (from != address(0)) {
-                _balances[from] -= batchSize;
-            }
-            if (to != address(0)) {
-                _balances[to] += batchSize;
-            }
-        }
-    }
+    function _beforeTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize) internal virtual {}
 
     /**
      * @dev Hook that is called after any token transfer. This includes minting and burning. If {ERC721Consecutive} is
@@ -397,4 +451,16 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
     function _afterTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize) internal virtual {}
+
+    /**
+     * @dev Unsafe write access to the balances, used by extensions that "mint" tokens using an {ownerOf} override.
+     *
+     * WARNING: Anyone calling this MUST ensure that the balances remain consistent with the ownership. The invariant
+     * being that for any address `a` the value returned by `balanceOf(a)` must be equal to the number of tokens such
+     * that `ownerOf(tokenId)` is `a`.
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function __unsafe_increaseBalance(address account, uint256 amount) internal {
+        _balances[account] += amount;
+    }
 }
