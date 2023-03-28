@@ -2,13 +2,15 @@
 pragma solidity ^0.8.17;
 
 import './Interface/BummyInfoInterface.sol';
+import './Interface/BummyCheeringInterface.sol';
+import "./Interface/BummyCoreInterface.sol";
+
 import './BummyOwnership.sol';
-contract BummyCheering is BummyOwnership {
+contract BummyCheering is BummyOwnership,BummyCheeringInterface{
 
     event Exhausted(address owner, uint256 momId, uint256 dadId);
-
-    /// @dev The address of the sibling contract that is used to implement the sooper-sekret
-    ///  genetic combination algorithm.
+    
+    /// @dev 무작위 
     BummyInfoInterface public bummyGene;
 
     /// @dev Update the address of the genetic contract, can only be called by the CEO.

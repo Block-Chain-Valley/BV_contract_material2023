@@ -3,8 +3,8 @@ pragma solidity ^0.8.17;
  
 import "./BummyAccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-
-contract BummyBase is BummyAccessControl, ERC721Enumerable {
+import "./Interface/BummyBaseInterface.sol";
+contract BummyBase is BummyAccessControl, ERC721Enumerable,BummyBaseInterface {
 
     /// @notice Name and symbol of the non fungible token, ad defined in ERC721
     string _name = "BummyNFT";
@@ -30,7 +30,7 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
         uint32 DadId;
 
         // 교배 중인 BummyId
-        uint32 siringWithId;
+        uint32 cheeringWithId;
 
         //교배시 1씩 증가하며 교배 쿨타임 기간 증가
         uint8 cooldownIndex;
@@ -104,7 +104,7 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
             cooldownEndTime: 0,
             MomId: uint32(_momId),
             DadId: uint32(_dadId),
-            siringWithId: 0,
+            cheeringWithId: 0,
             cooldownIndex: 0,
             children: 0,
             generation: uint16(_generation)

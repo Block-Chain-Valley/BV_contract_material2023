@@ -7,16 +7,12 @@ import "../Interface/BummyCoreInterface.sol";
 contract BummyInfo is BummyInfoInterface {
     bool public isBummyInfo = true;
 
-    // This is the privileged birther address. If this is set to 0, privileged birthing is disabled
-    address internal _privilegedBirther;
-    // Privileged window size for birthers, set to 5 blocks.
-    uint256 public privilegedBirtherWindowSize = 5;
     BummyCoreInterface _bummyCore;
 
-    constructor(address _privilegedBirtherAddress, address _bummyCoreAddress) {
+    constructor(address _bummyCoreAddress) {
         require(_bummyCoreAddress != address(0));
         _bummyCore = BummyCoreInterface(_bummyCoreAddress);
-        _privilegedBirther = _privilegedBirtherAddress;
+       
     }
 
     /// @dev the function as defined in the breeding contract - as defined in CK bible

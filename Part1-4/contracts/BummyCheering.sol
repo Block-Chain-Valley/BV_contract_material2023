@@ -2,21 +2,20 @@
 pragma solidity ^0.8.17;
 
 import './Interface/BummyInfoInterface.sol';
+import './Interface/BummyCheeringInterface.sol';
+import "./Interface/BummyCoreInterface.sol";
+
 import './BummyOwnership.sol';
-contract BummyCheering is BummyOwnership {
+contract BummyCheering is BummyOwnership,BummyCheeringInterface{
 
-    /// @dev The Pregnant event is fired when two bummies successfully cheer and the pregnancy
-    ///  timer begins for the mom.
-    event Pregnant(address owner, uint256 momId, uint256 dadId);
-
-
-    /// @dev The address of the sibling contract that is used to implement the sooper-sekret
-    ///  genetic combination algorithm.
+    event Exhausted(address owner, uint256 momId, uint256 dadId);
+    
+    /// @dev 무작위 
     BummyInfoInterface public bummyGene;
 
     /// @dev Update the address of the genetic contract, can only be called by the CEO.
     /// @param _address An address of a GeneScience contract instance to be used from this point forward.
-    function setBummyInfoAddress(address _address) public onlyCEO {
+    function setBummyInfoAddress(address _address) external onlyCEO {
         BummyInfoInterface candidateContract = BummyInfoInterface(_address);
 
         // NOTE: verify that a contract is what we expect
@@ -28,13 +27,13 @@ contract BummyCheering is BummyOwnership {
 
 
     /// @dev Check if a dad has authorized breeding with this mom. True if both dad
-    ///  and mom have the same owner, or if the dad has given cheering permission to
+    ///  and mom have the same owner, or if the dad has given siring permission to
     ///  the mom's owner (via approveSiring()).
     function _isCheeringPermitted(uint256 _dadId, uint256 _momId) internal view returns (bool) {
         address momOwner = _ownerOf(_momId);
 
         // Siring is okay if they have same owner, or if the mom's owner was given
-        // permission to cheer with this dad.
+        // permission to breed with this dad.
         return (cheerAllowedToAddress[_dadId] == momOwner);
     }
 
@@ -45,9 +44,6 @@ contract BummyCheering is BummyOwnership {
         // Compute the end of the cooldown time (based on current cooldownIndex)
         _bummy.cooldownEndTime = uint64(block.timestamp + cooldowns[_bummy.cooldownIndex]);
 
-        // Increment the breeding count, clamping it at 13, which is the length of the
-        // cooldowns array. We could check the array size dynamically, but hard-coding
-        // this as a constant saves gas. Yay, Solidity!
         if (_bummy.cooldownIndex < 5 && _bummy.children < 3) {
             _bummy.cooldownIndex += 1;
             _bummy.children += 1;
@@ -56,7 +52,7 @@ contract BummyCheering is BummyOwnership {
 
     /// @notice Grants approval to another user to dad with one of your Bummies.
     /// @param _addr The address that will be able to dad with your Bummy. Set to
-    ///  address(0) to clear all cheering approvals for this Bummy.
+    ///  address(0) to clear all siring approvals for this Bummy.
     /// @param _dadId A Bummy that you own that _addr will now be able to dad with.
     function approveCheering(address _addr, uint256 _dadId)
         public
@@ -70,14 +66,14 @@ contract BummyCheering is BummyOwnership {
     /// @dev Checks to see if a given Bummy is pregnant and (if so) if the gestation
     ///  period has passed.
     function _isReadyToGiveBirth(Bummy memory _mom) private view returns (bool) {
-        return (_mom.siringWithId != 0) && (_mom.cooldownEndTime <= block.timestamp);
+        return (_mom.cheeringWithId != 0) && (_mom.cooldownEndTime <= block.timestamp);
     }
 
-    /// @notice Checks that a given bummy is able to cheer (i.e. it is not pregnant or
-    ///  in the middle of a cheering cooldown).
+    /// @notice Checks that a given bummy is able to breed (i.e. it is not pregnant or
+    ///  in the middle of a siring cooldown).
     /// @param _bummyId reference the id of the bummy, any user can inquire about it
     function isReadyToCheer(uint256 _bummyId)
-        public
+        external
         view
         returns (bool)
     {
@@ -86,14 +82,14 @@ contract BummyCheering is BummyOwnership {
         return _isReadyToCheer(bum);
     }
 
-    /// @dev Checks that a given bummy is able to cheer. Requires that the
+    /// @dev Checks that a given bummy is able to breed. Requires that the
     ///  current cooldown is finished (for sires) and also checks that there is
     ///  no pending pregnancy.
     function _isReadyToCheer(Bummy memory _bum) internal view returns (bool) {
         // In addition to checking the cooldownEndTime, we also need to check to see if
         // the bum has a pending birth; there can be some period of time between the end
         // of the pregnacy timer and the birth event.
-        return (_bum.siringWithId == 0) && (_bum.cooldownEndTime <= block.timestamp);
+        return (_bum.cheeringWithId == 0) && (_bum.cooldownEndTime <= block.timestamp);
     }
 
     /// @dev 개족보 방지를 위한 함수
@@ -111,12 +107,12 @@ contract BummyCheering is BummyOwnership {
         view
         returns(bool)
     {
-        // A Bummy can't cheer with itself!
+        // A Bummy can't breed with itself!
         if (_momId == _dadId) {
             return false;
         }
 
-        // Bummies can't cheer with their parents.
+        // Bummies can't breed with their parents.
         if (_mom.MomId == _dadId || _mom.DadId == _dadId) {
             return false;
         }
@@ -130,7 +126,7 @@ contract BummyCheering is BummyOwnership {
             return true;
         }
 
-        // Bummies can't cheer with full or half siblings.
+        // Bummies can't breed with full or half siblings.
         if (_dad.MomId == _mom.MomId || _dad.MomId == _mom.DadId) {
             return false;
         }
@@ -163,8 +159,8 @@ contract BummyCheering is BummyOwnership {
     ///  have previously been given Siring approval. Will either make your bum pregnant, or will
     ///  fail entirely.
     /// @param _momId The ID of the Bummy acting as mom (will end up pregnant if successful)
-    /// @param _dadId The ID of the Bummy acting as dad (will begin its cheering cooldown if successful)
-    function cheerWith(uint256 _momId, uint256 _dadId) public whenNotPaused {
+    /// @param _dadId The ID of the Bummy acting as dad (will begin its siring cooldown if successful)
+    function cheerWith(uint256 _momId, uint256 _dadId) external whenNotPaused {
         // Caller must own the mom.
         require(_owns(msg.sender, _momId));
 
@@ -175,25 +171,25 @@ contract BummyCheering is BummyOwnership {
         //   auction house will never call cheerWith().
         // For dad: Similarly, a dad on auction will be owned by the auction house
         //   and the act of transferring ownership will have cleared any oustanding
-        //   cheering approval.
+        //   siring approval.
         // Thus we don't need to spend gas explicitly checking to see if either bum
         // is on auction.
 
         // Check that mom and dad are both owned by caller, or that the dad
-        // has given cheering permission to caller (i.e. mom's owner).
+        // has given siring permission to caller (i.e. mom's owner).
         // Will fail for _sireId = 0
         require(_isCheeringPermitted(_dadId, _momId));
 
         // Grab a reference to the potential mom
         Bummy storage mom = bummies[_momId];
 
-        // Make sure mom isn't pregnant, or in the middle of a cheering cooldown
+        // Make sure mom isn't pregnant, or in the middle of a siring cooldown
         require(_isReadyToCheer(mom));
 
         // Grab a reference to the potential dad
         Bummy storage dad = bummies[_dadId];
 
-        // Make sure dad isn't pregnant, or in the middle of a cheering cooldown
+        // Make sure dad isn't pregnant, or in the middle of a siring cooldown
         require(_isReadyToCheer(dad));
 
         // Test that these cats are a valid mating pair.
@@ -216,19 +212,19 @@ contract BummyCheering is BummyOwnership {
         Bummy storage mom = bummies[_momId];
 
         // Mark the mom as pregnant, keeping track of who the dad is.
-        mom.siringWithId = uint32(_dadId);
+        mom.cheeringWithId = uint32(_dadId);
 
         // Trigger the cooldown for both parents.
         _triggerCooldown(dad);
         _triggerCooldown(mom);
 
-        // Clear cheering permission for both parents. This may not be strictly necessary
+        // Clear siring permission for both parents. This may not be strictly necessary
         // but it's likely to avoid confusion!
         delete cheerAllowedToAddress[_momId];
         delete cheerAllowedToAddress[_dadId];
 
         // Emit the pregnancy event.
-        emit Pregnant(_ownerOf(_momId), _momId, _dadId);
+        emit Exhausted(_ownerOf(_momId), _momId, _dadId);
     }
 
 
@@ -239,10 +235,10 @@ contract BummyCheering is BummyOwnership {
     /// @dev Looks at a given Bummy and, if pregnant and if the gestation period has passed,
     ///  combines the genes of the two parents to create a new bummy. The new Bummy is assigned
     ///  to the current owner of the mom. Upon successful completion, both the mom and the
-    ///  new bummy will be ready to cheer again. Note that anyone can call this function (if they
+    ///  new bummy will be ready to breed again. Note that anyone can call this function (if they
     ///  are willing to pay the gas!), but the new bummy always goes to the mother's owner.
-    function giveBirth(uint256 _momId)
-        public
+    function inviteFriend(uint256 _momId)
+        external
         whenNotPaused
         returns(uint256)
     {
@@ -256,7 +252,7 @@ contract BummyCheering is BummyOwnership {
         require(_isReadyToGiveBirth(mom));
 
         // Grab a reference to the dad in storage.
-        uint256 dadId = mom.siringWithId;
+        uint256 dadId = mom.cheeringWithId;
         Bummy storage dad = bummies[dadId];
 
         // Determine the higher generation number of the two parents
@@ -270,13 +266,13 @@ contract BummyCheering is BummyOwnership {
 
         // Make the new bummy!
         address owner = _ownerOf(_momId);
-        uint256 newBummyId = _createBummy(_momId, mom.siringWithId, parentGen + 1, childGenes, owner);
+        uint256 bummyId = _createBummy(_momId, mom.cheeringWithId, parentGen + 1, childGenes, owner);
 
-        // Clear the reference to dad from the mom (REQUIRED! Having siringWithId
+        // Clear the reference to dad from the mom (REQUIRED! Having cheeringWith
         // set is what marks a mom as being pregnant.)
-        delete mom.siringWithId;
+        delete mom.cheeringWithId;
 
         // return the new bummy's ID
-        return newBummyId;
+        return bummyId;
     }
 }

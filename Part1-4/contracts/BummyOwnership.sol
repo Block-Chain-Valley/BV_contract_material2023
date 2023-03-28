@@ -2,9 +2,8 @@
 pragma solidity ^0.8.17;
  
 import "./BummyBase.sol";
-
-
-contract BummyOwnership is BummyBase {
+import "./Interface/BummyOwnershipInterface.sol";
+contract BummyOwnership is BummyBase,BummyOwnershipInterface {
 
     /// @dev _tokenId에 해당하는 token의 owner가 _claimant 과 동일하면 true 아니면 false를 반환
     /// @param _claimant the address we are validating against.
@@ -19,7 +18,7 @@ contract BummyOwnership is BummyBase {
     /// 있다면 이를 _recipient한테 돌려보냅니다.
     /// @param _bummyId - ID of bummy
     /// @param _recipient - Address to send the cat to
-    function rescueLostBummy(uint256 _bummyId, address _recipient) public onlyCOO whenNotPaused {
+    function rescueLostBummy(uint256 _bummyId, address _recipient) external onlyCOO whenNotPaused {
         require(_owns(address(this),_bummyId));
         _transfer(address(this), _recipient, _bummyId);
         

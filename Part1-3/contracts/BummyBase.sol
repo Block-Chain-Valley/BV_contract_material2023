@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.17;
-
+ 
 import "./BummyAccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-
-contract BummyBase is BummyAccessControl, ERC721Enumerable {
+import "./Interface/BummyBaseInterface.sol";
+contract BummyBase is BummyAccessControl, ERC721Enumerable,BummyBaseInterface {
 
     /// @notice Name and symbol of the non fungible token, ad defined in ERC721
     string _name = "BummyNFT";
@@ -30,10 +30,12 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
         uint32 DadId;
 
         // 교배 중인 BummyId
-        uint32 siringWithId;
+        uint32 cheeringWithId;
 
         //교배시 1씩 증가하며 교배 쿨타임 기간 증가
-        uint16 cooldownIndex;
+        uint8 cooldownIndex;
+        //자식 수
+        uint8 children;
 
         // 세대수, 이 값은 부모의 세대에 의해 아래와 같이 결정
         // max(mom.generation, dad.generation) + 1
@@ -41,9 +43,9 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
     }
 
     /*** CONSTANTS ***/
-    // 교배를 너무 많이 하는 것을 방지하기 위해 
+    // 어깨동무를 너무 많이 하는 것을 방지하기 위해 
     // cooldown 값이 교배할수록 증가함.
-    uint32[14] public cooldowns = [
+    uint32[8] public cooldowns = [
         uint32(1 minutes),
         uint32(2 minutes),
         uint32(5 minutes),
@@ -51,13 +53,7 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
         uint32(30 minutes),
         uint32(1 hours),
         uint32(2 hours),
-        uint32(4 hours),
-        uint32(8 hours),
-        uint32(16 hours),
-        uint32(1 days),
-        uint32(2 days),
-        uint32(4 days),
-        uint32(7 days)
+        uint32(4 hours)
     ];
 
     /*** STORAGE ***/
@@ -66,23 +62,22 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
     /// ID = 0인 버미는 존재할 수 없습니다.
     Bummy[] bummies;
 
+    
     /// @dev BummyId와 owner를 mapping
     /// BummyId => siring이 허락된 address
-    mapping (uint256 => address) public sireAllowedToAddress;
+    mapping (uint256 => address) public cheerAllowedToAddress;
 
+    
     /// @dev _tokenId에 해당하는 Bummy를 _from에서 _to로 보냅니다.
     /// 
     function _transfer(address _from, address _to, uint256 _tokenId) override internal virtual {
-        if(_from != address(0)){
-            delete sireAllowedToAddress[_tokenId];
-        }
-        super._transfer(_from,_to,_tokenId);
+       
     }
 
     /// @dev 버미를 생성하고 민팅합니다. 
     /// 이때, tokenId(BummyId)가 정해집니다.  
-    /// @param _momId The bummy ID of the matron of this bummy (zero for gen0)
-    /// @param _dadId The bummy ID of the sire of this bummy (zero for gen0)
+    /// @param _momId The bummy ID of the mom of this bummy (zero for gen0)
+    /// @param _dadId The bummy ID of the dad of this bummy (zero for gen0)
     /// @param _generation The generation number of this bummy, must be computed by caller.
     /// @param _genes The bummy's genetic code.
     /// @param _owner The inital owner of this bummy, must be non-zero (except for the unKitty, ID 0)
@@ -106,9 +101,11 @@ contract BummyBase is BummyAccessControl, ERC721Enumerable {
             cooldownEndTime: 0,
             MomId: uint32(_momId),
             DadId: uint32(_dadId),
-            siringWithId: 0,
+            cheeringWithId: 0,
             cooldownIndex: 0,
+            children: 0,
             generation: uint16(_generation)
+
         });
         bummies.push(_bummy);
         uint256 newBummyId = bummies.length - 1;

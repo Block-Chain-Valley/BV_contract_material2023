@@ -3,8 +3,8 @@ pragma solidity ^0.8.17;
  
 import "./BummyAccessControl.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-
-contract BummyBase is BummyAccessControl, ERC721Enumerable {
+import "./Interface/BummyBaseInterface.sol";
+contract BummyBase is BummyAccessControl, ERC721Enumerable,BummyBaseInterface {
 
     /// @notice Name and symbol of the non fungible token, ad defined in ERC721
     string _name = "BummyNFT";

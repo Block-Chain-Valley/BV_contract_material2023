@@ -2,8 +2,8 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/security/Pausable.sol";
-
-contract BummyAccessControl is Pausable{
+import "./Interface/BummyAccessInterface.sol";
+contract BummyAccessControl is Pausable,BummyAccessInterface{
 
     /// @dev 새로운 컨트랙트 주소로 컨트랙트 업그레이드시 발생하는 이벤트
     /// 오류 수정이나 새로운 버전이 나왔을때 컨트랙트를 업그레이드하는 상황에 발생하게 됩니다.
@@ -43,31 +43,21 @@ contract BummyAccessControl is Pausable{
 
     /// @dev Assigns a new address to act as the CEO. Only available to the current CEO.
     /// @param _newCEO The address of the new CEO
-    function setCEO(address _newCEO) public onlyCEO {
+    function setCEO(address _newCEO) external onlyCEO {
         require(_newCEO != address(0));
 
         ceoAddress = _newCEO;
     }
 
-    /// @dev Assigns a new address to act as the CFO. Only available to the current CEO.
-    /// @param _newCFO The address of the new CFO
-    function setCFO(address _newCFO) public onlyCEO {
-        require(_newCFO != address(0));
-
-        cfoAddress = _newCFO;
-    }
 
     /// @dev Assigns a new address to act as the COO. Only available to the current CEO.
     /// @param _newCOO The address of the new COO
-    function setCOO(address _newCOO) public onlyCEO {
+    function setCOO(address _newCOO) external onlyCEO {
         require(_newCOO != address(0));
 
         cooAddress = _newCOO;
     }
 
-    function withdrawBalance() external onlyCFO {
-       
-    }
 
     /// @dev Called by any "C-level" role to pause the contract. Used only when
     ///  a bug or exploit is detected and we need to limit damage.
@@ -78,7 +68,7 @@ contract BummyAccessControl is Pausable{
     /// @dev Unpauses the smart contract. Can only be called by the CEO, since
     ///  one reason we may pause the contract is when CFO or COO accounts are
     ///  compromised.
-    function unpause() public onlyCEO {
+    function unpause() public virtual onlyCEO {
         // can't unpause if contract was upgraded
         _unpause();
     }

@@ -2,8 +2,8 @@
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/security/Pausable.sol";
-
-contract BummyAccessControl is Pausable{
+import "./Interface/BummyAccessInterface.sol";
+contract BummyAccessControl is Pausable,BummyAccessInterface{
 
     /// @dev 새로운 컨트랙트 주소로 컨트랙트 업그레이드시 발생하는 이벤트
     /// 오류 수정이나 새로운 버전이 나왔을때 컨트랙트를 업그레이드하는 상황에 발생하게 됩니다.

@@ -2,9 +2,8 @@
 pragma solidity ^0.8.17;
  
 import "./BummyBase.sol";
-
-
-contract BummyOwnership is BummyBase {
+import "./Interface/BummyOwnershipInterface.sol";
+contract BummyOwnership is BummyBase,BummyOwnershipInterface {
 
     /// @dev _tokenId에 해당하는 token의 owner가 _claimant 과 동일하면 true 아니면 false를 반환
     /// @param _claimant the address we are validating against.

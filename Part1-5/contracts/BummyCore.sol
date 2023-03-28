@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import "./BummyMinting.sol";
 import "./Interface/BummyCoreInterface.sol";
 
-contract BummyCore is BummyMinting{
+contract BummyCore is BummyMinting, BummyCoreInterface{
     // Set in case the core contract is broken and an upgrade is required
     BummyCoreInterface public newContractAddress;
 
@@ -42,7 +42,7 @@ contract BummyCore is BummyMinting{
         external
         view
         returns (
-            bool isGestating,
+            bool isExhausted,
             bool isReady,
             uint256 cooldownIndex,
             uint256 nextActionAt,
@@ -56,8 +56,8 @@ contract BummyCore is BummyMinting{
     {
         Bummy storage bum = bummies[_id];
 
-        // if this variable is 0 then it's not gestating
-        isGestating = (bum.cheeringWithId != 0);
+        // if this variable is 0 then it's not Exhausted
+        isExhausted = (bum.cheeringWithId != 0);
         isReady = (bum.cooldownEndTime <= block.timestamp);
         cooldownIndex = uint256(bum.cooldownIndex);
         nextActionAt = uint256(bum.cooldownEndTime);
