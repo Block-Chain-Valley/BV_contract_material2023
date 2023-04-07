@@ -7,7 +7,7 @@ import {
 } from "../typechain-types";
 
 async function main() {
-  const [deployer, owner] = await ethers.getSigners();
+  const [deployer] = await ethers.getSigners();
 
   console.log("Deploying contracts with the account:", deployer.address);
 
@@ -29,7 +29,8 @@ async function main() {
   console.log("bummyInfo:", bummyInfo.address);
 
   await bummyCoreNFT.setBummyInfoAddress(bummyInfo.address);
-  const bummyId1 = await bummyCoreNFT.createPromoBummy(1, deployer.address);
+  await bummyCoreNFT.createPromoBummy(1, deployer.address);
+
   console.log("bummyId 1:", bummyId1);
   console.log(
     "bummyId 2:",
