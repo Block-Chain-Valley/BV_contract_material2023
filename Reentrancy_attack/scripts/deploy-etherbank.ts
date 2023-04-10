@@ -1,8 +1,7 @@
 import { ethers } from "hardhat";
 import { join } from "path";
-import { writeFileSync } from "fs";
+import { writeFileSync, readFileSync } from "fs";
 async function main() {
-  const addressBook: { [key: string]: string | string[] } = {};
   //* deploy EtherBank contract
   const EtherBank = await ethers.getContractFactory("EtherBank");
   const etherBank = await EtherBank.deploy();
@@ -10,7 +9,7 @@ async function main() {
   await etherBank.deployed();
 
   console.log("EtherBank deployed to:", etherBank.address);
-  addressBook.EtherBank = etherBank.address;
+
   const [deployer, signer1, signer2] = await ethers.getSigners();
 
   //* Deployer deposits 1 ether
@@ -27,8 +26,13 @@ async function main() {
     (await etherBank.getBalance()).toString()
   );
   //* Make etherBank addressBook.json
+
+  const addressBookData = readFileSync(join(__dirname, "./addressBook.json"));
+  const addressBook = JSON.parse(addressBookData.toString());
+  addressBook.EtherBank = etherBank.address;
+
   writeFileSync(
-    join(__dirname, "addressBook.json"),
+    join(__dirname, "./addressBook.json"),
     JSON.stringify(addressBook, null, 2)
   );
 }
